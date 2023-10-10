@@ -1,0 +1,37 @@
+
+
+service: bedrock-proxy-service
+
+frameworkVersion: "3"
+
+plugins:
+  - serverless-esbuild
+  - serverless-offline
+
+package: 
+  individually: true
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  stage: dev
+  region: us-west-2
+  timeout: 30
+  iam:
+    role:
+      statements:
+        - Effect: "Allow"
+          Action:
+            - "bedrock:InvokeModel"
+          Resource: '*'
+      
+functions:
+  BedrockProxyLambda:
+    name: ${self:service}-${self:provider.stage}-function
+    handler: index.handler
+    events:
+      - http:
+          path: /proxy
+          method: post
+
+
