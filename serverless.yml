@@ -24,14 +24,28 @@ provider:
           Action:
             - "bedrock:InvokeModel"
           Resource: '*'
+
+custom:
+  lambda:
+    base:
+      name: ${self:service}-${self:provider.stage}
+      arn: arn:aws:lambda:${self:provider.region}:${AWS::AccountId}:function
+    BedrockProxyLambda:
+      name: ${self:custom.lambda.base.name}-function
+      arn: ${self:custom.lambda.base.arn}:${self:custom.lambda.BedrockProxyLambda.name}
       
 functions:
   BedrockProxyLambda:
     name: ${self:service}-${self:provider.stage}-function
     handler: index.handler
-    events:
-      - http:
-          path: /proxy
-          method: post
 
+
+resources:
+  Resources:
+     BedrockProxyLambdaURL:
+       Type: AWS::Lambda::Url
+       Properties: 
+        AuthType: NONE
+        InvokeMode: RESPONSE_STREAM
+        TargetFunctionArn: arn:aws:lambda:us-west-2:612850243659:function:bedrock-proxy-service-dev-function
 
